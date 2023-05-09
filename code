@@ -1,0 +1,102 @@
+package encryptdecrypt
+import java.io.File
+
+fun main(args: Array<String>) {
+    var modeS = "enc"
+    var algS = "shift"
+    var dataS = ""
+    var keyI = 0
+    var inputFileName = ""
+    var outputFileName = ""
+    var inputS = ""
+    for (i in 0..args.size-1 step 2) {
+        when(args[i]) {
+            "-mode" -> modeS = args[i+1]
+            "-key" -> keyI = args[i+1].toInt()
+            "-data" -> dataS = args[i+1]
+            "-in" -> inputFileName = args[i+1]
+            "-out" -> outputFileName = args[i+1]
+            "-alg" -> algS = args[i+1]
+        }
+    }
+
+    dataS = if((dataS != "" && inputFileName != "") || (inputFileName == "")) {
+        dataS
+    } else (if (dataS == "") {
+        File(inputFileName).readText()
+    } else {
+        ""
+    }).toString()
+
+    // Overwrite the file to start from clean slate
+    File(outputFileName).writeText("")
+
+    when(modeS) {
+        "enc" -> {
+            if (outputFileName == "") {
+                if (algS == "unicode") {
+                    for (i in 0 until dataS.length) print(enc(dataS[i], keyI))
+                } else if (algS == "shift") {
+                    for (i in 0 until dataS.length) print(enc_shift(dataS[i], keyI))
+                }
+            } else {
+                if (algS == "unicode") {
+                    for (i in 0 until dataS.length) {
+                        File(outputFileName).appendText(enc(dataS[i], keyI).toString())
+                    }
+                } else if (algS == "shift") {
+                    for (i in 0 until dataS.length) {
+                        File(outputFileName).appendText(enc_shift(dataS[i], keyI).toString())
+                    }
+                }
+            }
+        }
+        "dec" -> {
+            if (outputFileName == "") {
+                if (algS == "unicode") {
+                    for (i in 0 until dataS.length) print(dec(dataS[i], keyI))
+                } else if (algS == "shift") {
+                    for (i in 0 until dataS.length) print(dec_shift(dataS[i], keyI))
+                }
+            } else {
+                if (algS == "unicode") {
+                    for (i in 0 until dataS.length) {
+                        File(outputFileName).appendText(dec(dataS[i], keyI).toString())
+                    }
+                } else if (algS == "shift") {
+                    for (i in 0 until dataS.length) {
+                        File(outputFileName).appendText(dec_shift(dataS[i], keyI).toString())
+                    }
+                }
+            }
+        }
+    }
+}
+
+fun enc(letter: Char, space: Int): Char {
+    var codeSpace = letter.code + space
+    return codeSpace.toChar()
+}
+
+fun dec(letter: Char, space: Int): Char {
+    var codeSpace = letter.code - space
+    return codeSpace.toChar()
+}
+
+fun enc_shift(letter: Char, space: Int): Char {
+    return if (letter.isLetter()) {
+       var codeSpace = letter.code + space
+       if (codeSpace <= 122) codeSpace.toChar() else (codeSpace - 26).toChar()
+    } else {
+        letter
+    }
+}
+
+fun dec_shift(letter: Char, space: Int): Char {
+    return if (letter.isLetter()) {
+        var codeSpace = letter.code - space
+        if (codeSpace >= 97) codeSpace.toChar() else (codeSpace + 26).toChar()
+    } else {
+        letter
+    }
+}
